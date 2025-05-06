@@ -5,14 +5,38 @@ services:
     image: postgres:15
     container_name: postgres
     restart: always
+    networks:
+      - suraj
     ports:
       - '5432:5432'
     environment:
+      &env_vars
       POSTGRES_USER: prisma
       POSTGRES_PASSWORD: prisma
       POSTGRES_DB: mydb
     volumes:
-      - postgres-data:/var/lib/postgresql/data
+      - postgres-d:/var/lib/postgresql/data
+      - ./primary-init:/docker-entrypoint-initdb.d
+
+  postgres_Replica:
+    image: postgres:15
+    container_name: postgres_Replica
+    restart: always
+    networks:
+      - suraj
+    ports:
+      - '5433:5432'
+    environment: *env_vars
+    volumes:
+      - postgres-d2:/var/lib/postgresql/data
+      - ./replica-init:/docker-entrypoint-initdb.d
+    depends_on:
+      - postgres
 
 volumes:
-  postgres-data:
+  postgres-d:
+  postgres-d2:
+
+networks:
+  suraj:
+    driver: bridge
